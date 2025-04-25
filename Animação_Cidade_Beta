@@ -1,0 +1,48 @@
+int numPredios = 5;
+
+float xNuvem = 800;
+
+float [] x = new float[numPredios];
+float [] y = new float[numPredios];
+float [] A = new float[numPredios];
+float [] L = new float[numPredios];
+
+float velocidade = 2;
+
+void setup () {
+  size(800, 400);
+  
+  for(int i = 0; i < numPredios; i++){
+    A[i] = random(100, 300);
+    L[i] = random(40, 80);
+    x[i] = random(-width, width);
+    y[i] = height - A[i];
+  }
+}
+
+
+void draw(){
+  background(135, 206, 235);
+  
+  for (int i = 0; i < numPredios; i++){
+    fill(100, 100, 200);
+    rect(x[i], y[i], L[i], A[i]);
+    fill(255);
+    noStroke();
+    ellipse(xNuvem, 70, 60, 60);
+    ellipse(xNuvem + 30, 80, 50, 50);
+    ellipse(xNuvem - 30, 80, 50, 50);
+    
+    xNuvem -= 1;
+    if (xNuvem < -60){
+      xNuvem = width + 60;
+    }
+    
+    x[i] += velocidade;
+    
+    if (x[i] > 800){
+      x[i] = 0;
+    }
+   
+  }
+}
