@@ -1,0 +1,82 @@
+#include <LedControl.h>
+
+#define DIN 4
+#define CS 6
+#define CLK 5
+
+LedControl lc = LedControl(DIN, CLK, CS, 1);
+
+const bool Coracao[8][8] = {
+{0,0,0,0,1,1,1,0},
+{0,0,0,1,1,1,1,1},
+{0,0,1,1,1,1,1,1},
+{0,1,1,1,1,1,1,0},
+{0,1,1,1,1,1,1,0},
+{0,0,1,1,1,1,1,1},
+{0,0,0,1,1,1,1,1},
+{0,0,0,0,1,1,1,0}
+};
+
+const bool Coracao2[8][8] = {
+{0,0,0,0,0,0,0,0},
+{0,0,0,0,1,1,0,0},
+{0,0,0,1,1,1,1,0},
+{0,0,1,1,1,1,0,0},
+{0,0,1,1,1,1,0,0},
+{0,0,0,1,1,1,1,0},
+{0,0,0,0,1,1,0,0},
+{0,0,0,0,0,0,0,0}
+};
+
+const bool Coracao3[8][8] = {
+{0,0,0,0,0,0,0,0},
+{0,0,0,0,0,1,0,0},
+{0,0,0,0,1,1,1,0},
+{0,0,0,1,1,1,0,0},
+{0,0,0,1,1,1,0,0},
+{0,0,0,0,1,1,1,0},
+{0,0,0,0,0,1,0,0},
+{0,0,0,0,0,0,0,0}
+};
+
+const bool Coracao4[8][8] = {
+{0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0},
+{0,0,0,0,1,1,0,0},
+{0,0,0,0,1,1,0,0},
+{0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0}
+};
+void desenhar(const bool imagem[8][8]){
+  for (int linha = 0; linha < 8; linha++){
+    for (int coluna = 0; coluna < 8; coluna++){
+      lc.setLed(0, linha, coluna, imagem[linha][coluna]);
+    }
+  }
+}
+
+void setup() {
+  // put your setup code here, to run once:
+  lc.shutdown(0, false);
+  lc.setIntensity(0, 8);
+  lc.clearDisplay(0);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  desenhar(Coracao);
+  delay(200);
+  lc.clearDisplay(0);
+  desenhar(Coracao2);
+  delay(200);
+  lc.clearDisplay(0);
+  desenhar(Coracao3);
+  delay(200);
+  lc.clearDisplay(0);
+  desenhar(Coracao4);
+  delay(200);
+  lc.clearDisplay(0);
+  delay(500);
+}
