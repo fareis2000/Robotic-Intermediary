@@ -1,0 +1,157 @@
+// ===============================
+// CONFIGURAÇÃO DO L298N
+// ===============================
+#define ENA 5   // PWM motor esquerdo
+#define ENB 6   // PWM motor direito
+#define IN1 7
+#define IN2 8
+#define IN3 9
+#define IN4 10
+
+// ===============================
+// SENSORES LM393 (DIGITAIS)
+// ===============================
+#define S1 2   // Esquerda
+#define S2 3   // Centro
+#define S3 4   // Direita
+
+// ===============================
+// VARIÁVEIS DO PID
+// ===============================
+float Kp = 25.0;
+float Ki = 0.0;
+float Kd = 10.0;
+
+float erro = 0;
+float erroAnterior = 0;
+float integral = 0;
+float derivada = 0;
+float derivadaFiltrada = 0;
+
+// filtro da derivada
+float alpha = 0.7;
+
+// velocidade base
+int velocidadeBase = 120;
+
+// PWM atual (para suavização)
+int pwmE_atual = 0;
+int pwmD_atual = 0;
+
+// ===============================
+// FUNÇÃO DE SUAVIZAÇÃO DO PWM
+// ===============================
+int suavizarPWM(int atual, int alvo, int passo = 5) {
+  if (atual < alvo) atual += passo;
+  else if (atual > alvo) atual -= passo;
+  return constrain(atual, 0, 255);
+}
+
+// ===============================
+// CONFIGURAÇÃO INICIAL
+// ===============================
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  pinMode(S1, INPUT);
+  pinMode(S2, INPUT);
+  pinMode(S3, INPUT);
+}
+
+// ===============================
+// LOOP PRINCIPAL
+// ===============================
+void loop() {
+
+  // ----- LEITURA DOS SENSORES -----
+  int s1 = digitalRead(S1);
+  int s2 = digitalRead(S2);
+  int s3 = digitalRead(S3);
+
+  // ===============================
+  // INTERPRETAÇÃO AVANÇADA DO ERRO
+  // ===============================
+  if (s1 == 0 && s2 == 1 && s3 == 1) erro = 2.5;      // curva forte esquerda
+  else if (s1 == 0 && s2 == 0 && s3 == 1) erro = 1.2; // leve esquerda
+  else if (s1 == 1 && s2 == 0 && s3 == 1) erro = 0;   // centro
+  else if (s1 == 1 && s2 == 0 && s3 == 0) erro = -1.2;// leve direita
+  else if (s1 == 1 && s2 == 1 && s3 == 0) erro = -2.5;// curva forte direita
+
+  // cruzamento ou linha perdida
+  else if (s1 == 0 && s2 == 0 && s3 == 0) erro = erroAnterior;
+  else if (s1 == 1 && s2 == 1 && s3 == 1) erro = erroAnterior;
+
+  // ===============================
+  // MODO CURVA EXTREMA
+  // ===============================
+  if (abs(erro) > 2) {
+    Kp = 35;
+    Kd = 15;
+  } else {
+    Kp = 25;
+    Kd = 10;
+  }
+
+  // ===============================
+  // PID COM ANTI-WINDUP
+  // ===============================
+  integral += erro;
+  integral = constrain(integral, -30, 30);
+
+  derivada = erro - erroAnterior;
+
+  // filtro passa-baixa na derivada
+  derivadaFiltrada = alpha * derivadaFiltrada + (1 - alpha) * derivada;
+
+  float PID = Kp * erro + Ki * integral + Kd * derivadaFiltrada;
+
+  erroAnterior = erro;
+
+  // ===============================
+  // CÁLCULO DAS VELOCIDADES
+  // ===============================
+  int velE = velocidadeBase + PID;
+  int velD = velocidadeBase - PID;
+
+  velE = constrain(velE, 0, 255);
+  velD = constrain(velD, 0, 255);
+
+  // suavização do PWM
+  pwmE_atual = suavizarPWM(pwmE_atual, velE);
+  pwmD_atual = suavizarPWM(pwmD_atual, velD);
+
+  // ===============================
+  // RECUPERAÇÃO QUANDO PERDE A LINHA
+  // ===============================
+  if (s1 == 1 && s2 == 1 && s3 == 1) {
+    pwmE_atual = 80 + erroAnterior * 40;
+    pwmD_atual = 80 - erroAnterior * 40;
+  }
+
+  // ===============================
+  // MOVIMENTAÇÃO DOS MOTORES
+  // ===============================
+  moverMotores(pwmE_atual, pwmD_atual);
+}
+
+// ===============================
+// FUNÇÃO DE MOVIMENTO
+// ===============================
+void moverMotores(int velE, int velD) {
+  // Motor Esquerdo
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, velE);
+
+  // Motor Direito
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, velD);
+}
