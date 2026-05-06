@@ -1,0 +1,59 @@
+// ================= SETUP =================
+void setup() {
+  size(500, 400);
+}
+
+// ================= DRAW =================
+void draw() {
+  background(255);
+
+  // -------- ROSTO --------
+  fill(14, 75, 171);
+  noStroke();
+  ellipse(250, 200, 300, 300);
+
+  // -------- SOBRANCELHAS --------
+  stroke(0);
+  fill(0);
+  rect(130, 140, 70, 10);
+  rect(300, 140, 70, 10);
+
+  // -------- NARIZ --------
+  stroke(255);
+  fill(14, 75, 171);
+  rect(245, 200, 10, 30);
+
+  // -------- OLHOS (POSIÇÃO BASE) --------
+  int augeLW = 175, augeLH = 200;
+  int augeRW = 330, augeRH = 200;
+
+  // -------- PUPILAS (INICIALIZAÇÃO CORRETA) --------
+  int pupileLW = augeLW;
+  int pupileLH = augeLH;
+  int pupileRW = augeRW;
+  int pupileRH = augeRH;
+
+  // -------- MOVIMENTO DAS PUPILAS --------
+  pupileLW = constrain(mouseX, 155, 195);
+  pupileLH = constrain(mouseY, 180, 220);
+
+  pupileRW = constrain(mouseX, 310, 350);
+  pupileRH = constrain(mouseY, 180, 220);
+
+  // -------- DESENHO DOS OLHOS --------
+  stroke(0);
+
+  if (mousePressed) {
+    fill(0); // olhos fechados (pretos)
+  } else {
+    fill(255); // olhos abertos (brancos)
+  }
+
+  ellipse(augeLW, augeLH, 70, 70);
+  ellipse(augeRW, augeRH, 70, 70);
+
+  // -------- DESENHO DAS PUPILAS --------
+  fill(94, 186, 43);
+  ellipse(pupileLW, pupileLH, 30, 30);
+  ellipse(pupileRW, pupileRH, 30, 30);
+}
