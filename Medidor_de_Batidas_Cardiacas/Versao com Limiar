@@ -1,0 +1,37 @@
+// Pinos do Sensor
+const int SENSOR_PIN = A0;    // Pino analógico conectado ao "S" (Sinal) do sensor
+const int LED_PIN = 13;       // LED interno do Arduino para piscar com o coração
+
+// Variáveis de calibração e leitura
+int leituraAnalogica = 0;     // Armazena o valor lido do sensor
+int threshold = 550;          // Limiar para identificar o batimento (ajuste se necessário)
+bool acimaDoLimiar = false;   // Controle para não contar o mesmo batimento várias vezes
+
+void setup() {
+  Serial.begin(9600);         // Inicializa a comunicação serial
+  pinMode(LED_PIN, OUTPUT);   // Configura o pino do LED como saída
+}
+
+void loop() {
+  // Leitura do valor analógico do sensor (varia de 0 a 1023)
+  leituraAnalogica = analogRead(SENSOR_PIN);
+
+  // Envia o valor para o Serial Plotter (Ferramentas > Rasterizador Serial)
+  Serial.println(leituraAnalogica);
+
+  // Lógica simples para piscar o LED com o batimento
+  if (leituraAnalogica > threshold) {
+    if (!acimaDoLimiar) {
+      digitalWrite(LED_PIN, HIGH); // Liga o LED no pico do batimento
+      acimaDoLimiar = true;
+    }
+  } else {
+    if (acimaDoLimiar) {
+      digitalWrite(LED_PIN, LOW);  // Desliga o LED quando o pulso cai
+      acimaDoLimiar = false;
+    }
+  }
+
+  // Pequeno delay para estabilizar a leitura e não lotar o buffer serial
+  delay(20);
+}
