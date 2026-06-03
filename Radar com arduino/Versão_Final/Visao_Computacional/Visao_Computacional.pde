@@ -12,7 +12,8 @@ String distance = "";
 String data = "";
 String noObject = "Out of Range"; // Mensagem padrão quando nenhum objeto é detectado
 float pixsDistance; // Distância em pixels para exibição no radar
-int iAngle = 0, iDistance = 0; // Variáveis inteiras para armazenar ângulo e distância
+int iAngle = 0, 
+int iDistance = 0; // Variáveis inteiras para armazenar ângulo e distância
 
 // Configuração inicial do Processing
 void setup() {
